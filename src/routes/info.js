@@ -9,3 +9,7 @@ const infoRoutes = [
 ];
 
 module.exports = infoRoutes;
+
+function add () {
+  
+}
