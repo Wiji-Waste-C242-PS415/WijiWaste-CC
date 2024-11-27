@@ -8,8 +8,18 @@ const profileRoutes = [
   },
   {
     method: "PUT",
-    path: "/profile",
+    path: "/profile/edit",
     handler: profileController.updateProfile,
+  },
+  {
+    method: "POST",
+    path: "/logout",
+    handler: (request, h) => {
+      return h.response({
+        message: "Logged out successfully.",
+        redirect: "/login",
+      }).code(200);
+    },
   },
 ];
 

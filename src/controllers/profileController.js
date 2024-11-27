@@ -10,26 +10,51 @@ const profileController = {
         return h.response({ error: "User not found." }).code(404);
       }
 
-      return h.response({ message: "Profile retrieved successfully.", user }).code(200);
+      return h.response({
+        message: "Profile retrieved successfully.",
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          address: user.address || "",
+          photoUrl: user.photoUrl || "",
+        },
+      }).code(200);
     } catch (err) {
       console.error(err);
-      return h.response({ error: "Failed to retrieve profile." }).code(500);
+      return h.response({
+        error: "Failed to retrieve profile."
+      }).code(500);
     }
   },
 
   async updateProfile(request, h) {
     const { userId } = request.query;
-    const { name, email } = request.payload;
+    const { name, email, password, address, photoUrl } = request.payload;
 
     try {
       const user = await userModel.getUserById(userId);
       if (!user) {
-        return h.response({ error: "User not found." }).code(404);
+        return h.response({
+          error: "User not found."
+        }).code(404);
       }
 
-      await userModel.updateUser(userId, { name, email });
+      const updatedData = { name, email, address };
+      if (password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        updatedData.password = hashedPassword;
+      }
+      if (photoUrl) {
+        updatedData.photoUrl = photoUrl;
+      }
 
-      return h.response({ message: "Profile updated successfully." }).code(200);
+      await userModel.updateUser(userId, updatedData);
+
+      return h.response({
+        message: "Profile updated successfully.",
+        redirect: `/profile?userId=${userId}`,
+      }).code(200);
     } catch (err) {
       console.error(err);
       return h.response({ error: "Failed to update profile." }).code(500);
