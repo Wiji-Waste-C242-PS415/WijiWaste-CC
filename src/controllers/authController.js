@@ -1,9 +1,24 @@
 const userModel = require("../models/userModel");
 const bcrypt = require("bcrypt");
+const Joi = require("joi");
 
 const authController = {
   async register(request, h) {
     const { name, email, password } = request.payload;
+    const schema = Joi.object({
+      name: Joi.string().min(3).required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().min(6).required(),
+    });
+
+    const { error } = schema.validate(request.payload);
+    if (error) {
+      return h.response({ error: error.details[0].message }).code(400);
+    }
+    
+    if (!name || !email || !password) {
+      return h.response({ error: "All fields are required." }).code(400);
+    }
 
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -19,6 +34,7 @@ const authController = {
       return h.response({ error: "Failed to register user." }).code(500);
     }
   },
+
 
   async login(request, h) {
     const { email, password } = request.payload;
@@ -42,7 +58,11 @@ const authController = {
   },
 
   async resetPassword(request, h) {
-    const { email, newPassword } = request.payload;
+    const { email, newPassword, confirmPassword } = request.payload;
+
+    if (newPassword !== confirmPassword) {
+      return h.response({ error: "Passwords do not match." }).code(400);
+    }
 
     try {
       const user = await userModel.getUserByEmail(email);
@@ -58,7 +78,8 @@ const authController = {
       console.error(err);
       return h.response({ error: "Failed to reset password." }).code(500);
     }
-  },
+  }
+
 };
 
 module.exports = authController;
