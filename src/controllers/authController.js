@@ -8,14 +8,21 @@ const authController = {
     const schema = Joi.object({
       name: Joi.string().min(3).required(),
       email: Joi.string().email().required(),
-      password: Joi.string().min(6).required(),
+      password: Joi.string()
+        .min(6)
+        .pattern(/[^A-Za-z0-9]/) // Validasi harus ada setidaknya satu simbol
+        .required()
+        .messages({
+          "string.min": "Password must be at least 6 characters long.",
+          "string.pattern.base": "Password must include at least one symbol.",
+        }),
     });
 
     const { error } = schema.validate(request.payload);
     if (error) {
       return h.response({ error: error.details[0].message }).code(400);
     }
-    
+
     if (!name || !email || !password) {
       return h.response({ error: "All fields are required." }).code(400);
     }
