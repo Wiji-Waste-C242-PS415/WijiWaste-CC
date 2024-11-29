@@ -6,27 +6,9 @@ const { nanoid } = require("nanoid");
 const authController = {
   async register(request, h) {
     const { name, email, password } = request.payload;
-    const schema = Joi.object({
-      name: Joi.string().min(3).required(),
-      email: Joi.string().email().required(),
-      password: Joi.string()
-        .min(6)
-        .pattern(/[^A-Za-z0-9]/) // Validasi harus ada setidaknya satu simbol
-        .required()
-        .messages({
-          "string.min": "Password must be at least 6 characters long.",
-          "string.pattern.base": "Password must include at least one symbol.",
-        }),
-    });
-
-    const { error } = schema.validate(request.payload);
-    if (error) {
-      return h.response({ error: error.details[0].message }).code(400);
-    }
-
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
-      const userId = nanoid(); 
+      const userId = nanoid();
 
       await userModel.createUser({
         id: userId,
