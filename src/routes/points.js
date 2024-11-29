@@ -1,16 +1,16 @@
-const { getUserPoints, exchangePoints } = require("../controllers/pointControler");
+const pointController = require("../controllers/pointControler");
 
-const pointsRoutes = [
-  {
-    method: "GET",
-    path: "/points",
-    handler: getUserPoints,
-  },
+const pointRoutes = [
   {
     method: "POST",
     path: "/points/exchange",
-    handler: exchangePoints,
+    handler: pointController.exchangePoints,
+  },
+  {
+    method: "GET",
+    path: "/points/history/{userId}",
+    handler: pointController.getExchangeHistory,
   },
 ];
 
-module.exports = pointsRoutes;
+module.exports = pointRoutes;

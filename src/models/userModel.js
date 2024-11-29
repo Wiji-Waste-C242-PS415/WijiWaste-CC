@@ -2,8 +2,10 @@ const db = require("../firestore");
 
 const userModel = {
   async createUser(data) {
-    const userRef = await db.collection("users").add(data);
-    return userRef.id;
+    const { id, ...userData } = data; // Pisahkan ID dan data lainnya
+    const userRef = db.collection("users").doc(id); // Gunakan ID sebagai document ID
+    await userRef.set(userData); // Simpan data
+    return id; // Kembalikan ID
   },
 
   async getUserByEmail(email) {

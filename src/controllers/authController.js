@@ -1,6 +1,7 @@
 const userModel = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const Joi = require("joi");
+const { nanoid } = require("nanoid");
 
 const authController = {
   async register(request, h) {
@@ -23,13 +24,12 @@ const authController = {
       return h.response({ error: error.details[0].message }).code(400);
     }
 
-    if (!name || !email || !password) {
-      return h.response({ error: "All fields are required." }).code(400);
-    }
-
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
-      const userId = await userModel.createUser({
+      const userId = nanoid(); 
+
+      await userModel.createUser({
+        id: userId,
         name,
         email,
         password: hashedPassword,
@@ -41,7 +41,6 @@ const authController = {
       return h.response({ error: "Failed to register user." }).code(500);
     }
   },
-
 
   async login(request, h) {
     const { email, password } = request.payload;

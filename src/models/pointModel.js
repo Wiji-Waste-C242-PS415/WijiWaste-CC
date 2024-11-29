@@ -1,21 +1,32 @@
 const db = require("../firestore");
 
-// Fungsi untuk mendapatkan data user berdasarkan userId
-const getUserById = async (userId) => {
-  const userRef = db.collection("users").doc(userId);
-  const userDoc = await userRef.get();
+const pointModel = {
+  async getUserById(userId) {
+    const userRef = db.collection("users").doc(userId);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) return null;
+    return { id: userId, ...userDoc.data() };
+  },
 
-  if (!userDoc.exists) {
-    throw new Error("User not found");
-  }
+  async updateUserPoints(userId, newPoints) {
+    const userRef = db.collection("users").doc(userId);
+    await userRef.update({ points: newPoints });
+  },
 
-  return { id: userDoc.id, ...userDoc.data() };
+  async addPointExchangeHistory(userId, exchangeData) {
+    const historyRef = db.collection("users").doc(userId).collection("pointExchangeHistory");
+    await historyRef.add({
+      ...exchangeData,
+      activityType: exchangeData.activityType || "Menukar poin",
+    });
+  },
+
+  async getPointExchangeHistory(userId) {
+    const historyRef = db.collection("users").doc(userId).collection("pointExchangeHistory");
+    const snapshot = await historyRef.orderBy("date", "desc").get();
+    if (snapshot.empty) return [];
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  },
 };
 
-// Fungsi untuk memperbarui poin user
-const updateUserPoints = async (userId, newPoints) => {
-  const userRef = db.collection("users").doc(userId);
-  await userRef.update({ points: newPoints });
-};
-
-module.exports = { getUserById, updateUserPoints };
+module.exports = pointModel;

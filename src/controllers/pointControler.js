@@ -1,54 +1,72 @@
-const { getUserById, updateUserPoints } = require("../models/pointModel");
+const pointModel = require("../models/pointModel");
 
-// Handler untuk mendapatkan poin user
-const getUserPoints = async (request, h) => {
-  const { userId } = request.query; // Mengambil userId dari query
+const pointController = {
+  async exchangePoints(request, h) {
+    const { userId, pointsToExchange } = request.payload;
 
-  try {
-    const user = await getUserById(userId);
-    return h.response({
-      success: true,
-      points: user.points || 0, // Default ke 0 jika poin tidak ada
-    });
-  } catch (error) {
-    return h.response({
-      success: false,
-      message: error.message,
-    }).code(404);
-  }
-};
-
-// Handler untuk menukar poin menjadi rupiah
-const exchangePoints = async (request, h) => {
-  const { userId, pointsToExchange } = request.payload; // Mengambil userId dan jumlah poin dari body
-  const exchangeRate = 1; // 1 poin = 1 rupiah
-
-  try {
-    const user = await getUserById(userId);
-
-    if (user.points < pointsToExchange) {
-      return h.response({
-        success: false,
-        message: "Not enough points",
-      }).code(400);
+    if (!userId || !pointsToExchange) {
+      return h.response({ error: "User ID and points to exchange are required." }).code(400);
     }
 
-    // Hitung poin baru dan simpan ke Firestore
-    const newPoints = user.points - pointsToExchange;
-    await updateUserPoints(userId, newPoints);
+    try {
+      const user = await pointModel.getUserById(userId);
+      if (!user) {
+        return h.response({ error: "User not found." }).code(404);
+      }
 
-    return h.response({
-      success: true,
-      message: "Points exchanged successfully",
-      exchangedAmount: pointsToExchange * exchangeRate, // Konversi ke rupiah
-      remainingPoints: newPoints,
-    });
-  } catch (error) {
-    return h.response({
-      success: false,
-      message: error.message,
-    }).code(400);
-  }
+      if (user.points < pointsToExchange) {
+        return h.response({ error: "Insufficient points." }).code(400);
+      }
+
+      const rupiahAmount = pointsToExchange;
+
+      const newPoints = user.points - pointsToExchange;
+      await pointModel.updateUserPoints(userId, newPoints);
+
+      await pointModel.addPointExchangeHistory(userId, {
+        exchangedPoints: pointsToExchange,
+        rupiahReceived: rupiahAmount,
+        date: new Date().toISOString(),
+      });
+
+      return h.response({
+        message: "Points exchanged successfully!",
+        data: {
+          pointsExchanged: pointsToExchange,
+          rupiahReceived: rupiahAmount,
+          remainingPoints: newPoints,
+        },
+      }).code(200);
+    } catch (err) {
+      console.error(err);
+      return h.response({ error: "Failed to exchange points." }).code(500);
+    }
+  },
+
+  async getExchangeHistory(request, h) {
+    const { userId } = request.params;
+
+    try {
+      const history = await pointModel.getPointExchangeHistory(userId);
+
+      const groupedHistory = history.reduce((acc, item) => {
+        const date = new Date(item.date).toLocaleDateString("id-ID", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        if (!acc[date]) acc[date] = [];
+        acc[date].push(item);
+        return acc;
+      }, {});
+
+      return h.response({ data: groupedHistory }).code(200);
+    } catch (err) {
+      console.error(err);
+      return h.response({ error: "Failed to fetch exchange history." }).code(500);
+    }
+  },
 };
 
-module.exports = { getUserPoints, exchangePoints };
+module.exports = pointController;
