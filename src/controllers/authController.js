@@ -1,20 +1,17 @@
 const userModel = require("../models/userModel");
-const bcrypt = require("bcrypt");
-const Joi = require("joi");
 const { nanoid } = require("nanoid");
 
 const authController = {
   async register(request, h) {
     const { name, email, password } = request.payload;
     try {
-      const hashedPassword = await bcrypt.hash(password, 10);
       const userId = nanoid();
 
       await userModel.createUser({
         id: userId,
         name,
         email,
-        password: hashedPassword,
+        password,
       });
 
       return h.response({ message: "User registered successfully!", userId }).code(201);
