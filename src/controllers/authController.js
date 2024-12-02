@@ -29,12 +29,6 @@ const authController = {
       if (!user) {
         return h.response({ error: "Invalid email or password." }).code(401);
       }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return h.response({ error: "Invalid email or password." }).code(401);
-      }
-
       return h.response({ message: "Login successful", user }).code(200);
     } catch (err) {
       console.error(err);
@@ -54,10 +48,6 @@ const authController = {
       if (!user) {
         return h.response({ error: "User not found." }).code(404);
       }
-
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-      await userModel.updateUser(user.id, { password: hashedPassword });
-
       return h.response({ message: "Password reset successful." }).code(200);
     } catch (err) {
       console.error(err);

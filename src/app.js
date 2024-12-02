@@ -1,9 +1,9 @@
 const Hapi = require("@hapi/hapi");
-// require("dotenv").config();
-
 // Import routes
 const authRoutes = require("../src/routes/auth");
 const wasteRoutes = require("../src/routes/waste");
+const profileRoutes = require("../src/routes/profile")
+
 
 const init = async () => {
   const server = Hapi.server({
@@ -12,7 +12,11 @@ const init = async () => {
   });
 
   // Register routes
-  server.route([...authRoutes, ...wasteRoutes]);
+  server.route(
+    authRoutes,
+    wasteRoutes,
+    profileRoutes
+  );
 
   await server.start();
   console.log("Server running on %s", server.info.uri);

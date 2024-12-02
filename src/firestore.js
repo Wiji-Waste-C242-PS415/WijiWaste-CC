@@ -1,19 +1,12 @@
-// const admin = require('firebase-admin');
-// const path = require('path');
+const { initializeApp, applicationDefault, cert } = require('firebase-admin/app');
+const { getFirestore, Timestamp, FieldValue, Filter } = require('firebase-admin/firestore');
 
-// // Load Service Account Key
-// const serviceAccount = require(path.join(__dirname, 'path-to-your-service-account-key.json'));
+const serviceAccount = require('../serviceAccountKey.json');
 
-// // Initialize Firebase Admin SDK
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-//   storageBucket: 'your-bucket-name.appspot.com', // Ganti dengan nama bucket Anda
-// });
+initializeApp({
+  credential: cert(serviceAccount)
+});
 
-// // Firestore Database
-// const db = admin.firestore();
+const db = getFirestore();
 
-// // Cloud Storage
-// const bucket = admin.storage().bucket();
-
-// module.exports = { db, bucket };
+module.exports = db

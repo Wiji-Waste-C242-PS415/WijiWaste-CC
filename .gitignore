@@ -1,5 +1,5 @@
 # GCP Key File
-gcp-key.json
+serviceAccountKey.json
 
 # Node.js Dependencies
 node_modules/
