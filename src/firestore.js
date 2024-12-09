@@ -1,12 +1,12 @@
-const { initializeApp, applicationDefault, cert } = require('firebase-admin/app');
-const { getFirestore, Timestamp, FieldValue, Filter } = require('firebase-admin/firestore');
+const admin = require("firebase-admin");
 
-const serviceAccount = require('../serviceAccountKey.json');
+// Pastikan file kredensial Anda sudah benar
+const serviceAccount = require("../serviceAccountKey.json");
 
-initializeApp({
-  credential: cert(serviceAccount)
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
 });
 
-const db = getFirestore();
+const db = admin.firestore();
+module.exports = db;
 
-module.exports = db

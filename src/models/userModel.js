@@ -1,21 +1,28 @@
 const db = require("../firestore");
+const usersCollection = db.collection("users");
 
 const userModel = {
-  async createUser(data) {
-    const { id, ...userData } = data; // Pisahkan ID dan data lainnya
-    const userRef = db.collection("users").doc(id); // Gunakan ID sebagai document ID
-    await userRef.set(userData); // Simpan data
-    return id; // Kembalikan ID
+  async createUser(user) {
+    await usersCollection.doc(user.id).set(user);
   },
 
   async getUserByEmail(email) {
-    const snapshot = await db.collection("users").where("email", "==", email).get();
-    if (snapshot.empty) return null;
-    return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+    const snapshot = await usersCollection.where("email", "==", email).get();
+    if (snapshot.empty) {
+      return null;
+    }
+    const user = snapshot.docs[0].data();
+    user.id = snapshot.docs[0].id; // Tambahkan ID dokumen
+    return user;
   },
 
-  async updateUser(id, data) {
-    await db.collection("users").doc(id).update(data);
+  async updateUserPassword(email, newPassword) {
+    const snapshot = await usersCollection.where("email", "==", email).get();
+    if (snapshot.empty) {
+      throw new Error("User not found");
+    }
+    const doc = snapshot.docs[0];
+    await usersCollection.doc(doc.id).update({ password: newPassword });
   },
 };
 
