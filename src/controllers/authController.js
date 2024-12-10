@@ -1,22 +1,23 @@
 const userModel = require("../models/userModel");
 const { nanoid } = require("nanoid");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 
 const authController = {
   async register(request, h) {
     const { name, email, password } = request.payload;
     try {
+      // Check if the email is already registered
+      const existingUser = await userModel.getUserByEmail(email);
+      if (existingUser) {
+        return h.response({ error: "Email is already registered." }).code(400);
+      }
+
       const userId = nanoid();
-      
-      // Hash password before storing
-      const hashedPassword = await bcrypt.hash(password, 10);
 
       await userModel.createUser({
         id: userId,
         name,
         email,
-        password: hashedPassword,
+        password,
       });
 
       return h.response({ message: "User registered successfully!", userId }).code(201);
@@ -31,22 +32,11 @@ const authController = {
 
     try {
       const user = await userModel.getUserByEmail(email);
-      if (!user) {
+      if (!user || user.password !== password) {
         return h.response({ error: "Invalid email or password." }).code(401);
       }
 
-      // Verify password
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return h.response({ error: "Invalid email or password." }).code(401);
-      }
-
-      // Create JWT token
-      const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
-      });
-
-      return h.response({ message: "Login successful!", token }).code(200);
+      return h.response({ message: "Login successful!", user }).code(200);
     } catch (err) {
       console.error(err);
       return h.response({ error: "Failed to login." }).code(500);
@@ -55,26 +45,24 @@ const authController = {
 
   async resetPassword(request, h) {
     const { email, newPassword, confirmPassword } = request.payload;
-  
+
     if (newPassword !== confirmPassword) {
       return h.response({ error: "Passwords do not match." }).code(400);
     }
-  
+
     try {
       const user = await userModel.getUserByEmail(email);
       if (!user) {
         return h.response({ error: "User not found." }).code(404);
       }
-  
+
       await userModel.updateUserPassword(email, newPassword);
       return h.response({ message: "Password reset successful." }).code(200);
     } catch (err) {
       console.error(err);
       return h.response({ error: "Failed to reset password." }).code(500);
     }
-  }
-  
-
+  },
 };
 
 module.exports = authController;
