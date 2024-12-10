@@ -1,17 +1,22 @@
 const userModel = require("../models/userModel");
 const { nanoid } = require("nanoid");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const authController = {
   async register(request, h) {
     const { name, email, password } = request.payload;
     try {
       const userId = nanoid();
+      
+      // Hash password before storing
+      const hashedPassword = await bcrypt.hash(password, 10);
 
       await userModel.createUser({
         id: userId,
         name,
         email,
-        password,
+        password: hashedPassword,
       });
 
       return h.response({ message: "User registered successfully!", userId }).code(201);
@@ -26,10 +31,22 @@ const authController = {
 
     try {
       const user = await userModel.getUserByEmail(email);
-      if (!password) {
+      if (!user) {
         return h.response({ error: "Invalid email or password." }).code(401);
       }
-      return h.response({ message: "Login successful", user }).code(200);
+
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return h.response({ error: "Invalid email or password." }).code(401);
+      }
+
+      // Create JWT token
+      const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+
+      return h.response({ message: "Login successful!", token }).code(200);
     } catch (err) {
       console.error(err);
       return h.response({ error: "Failed to login." }).code(500);

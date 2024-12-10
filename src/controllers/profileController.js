@@ -1,15 +1,14 @@
-const userModel = require("../models/profileModel");
+const profileModel = require("../models/profileModel");
 
 const profileController = {
   async getProfile(request, h) {
-    const { userId } = request.query;
-
+    const email = request.user.email; // Ambil email dari token yang diverifikasi
     try {
-      const user = await userModel.getUserById(userId);
+      const user = await profileModel.getUserByEmail(email); // Ambil user berdasarkan email
       if (!user) {
         return h.response({ error: "User not found." }).code(404);
       }
-
+  
       return h.response({
         message: "Profile retrieved successfully.",
         user: {
@@ -22,18 +21,16 @@ const profileController = {
       }).code(200);
     } catch (err) {
       console.error(err);
-      return h.response({
-        error: "Failed to retrieve profile."
-      }).code(500);
+      return h.response({ error: "Failed to retrieve profile." }).code(500);
     }
   },
-
+  
   async updateProfile(request, h) {
     const { userId } = request.query;
     const { name, email, password, address, photoUrl } = request.payload;
 
     try {
-      const user = await userModel.getUserById(userId);
+      const user = await profileModel.getUserById(userId);
       if (!user) {
         return h.response({
           error: "User not found."
@@ -49,7 +46,7 @@ const profileController = {
         updatedData.photoUrl = photoUrl;
       }
 
-      await userModel.updateUser(userId, updatedData);
+      await profileModel.updateUser(userId, updatedData);
 
       return h.response({
         message: "Profile updated successfully.",

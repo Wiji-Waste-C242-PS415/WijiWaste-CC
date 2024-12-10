@@ -3,6 +3,8 @@ const Hapi = require("@hapi/hapi");
 const authRoutes = require("../src/routes/auth");
 const wasteRoutes = require("../src/routes/waste");
 const profileRoutes = require("../src/routes/profile")
+require("dotenv").config();
+
 
 
 const init = async () => {

@@ -1,6 +1,6 @@
 const db = require("../firestore");
 
-const userModel = {
+const profileModel = {
   async createUser(data) {
     const userRef = await db.collection("users").add(data);
     return userRef.id;
@@ -23,4 +23,4 @@ const userModel = {
   },
 };
 
-module.exports = userModel;
+module.exports = profileModel;

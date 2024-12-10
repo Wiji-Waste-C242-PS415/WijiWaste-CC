@@ -1,15 +1,22 @@
 const profileController = require("../controllers/profileController");
+const authMiddleware = require("../middlewares/authMiddleware");
 
 const profileRoutes = [
   {
     method: "GET",
     path: "/profile",
     handler: profileController.getProfile,
+    options: {
+      pre: [authMiddleware.verifyToken], // Middleware autentikasi
+    },
   },
   {
     method: "PUT",
-    path: "/profile/edit",
+    path: "/profile",
     handler: profileController.updateProfile,
+    options: {
+      pre: [authMiddleware.verifyToken], // Middleware autentikasi
+    },
   },
   {
     method: "POST",
