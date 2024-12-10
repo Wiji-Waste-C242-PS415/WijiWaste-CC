@@ -18,12 +18,11 @@ const init = async () => {
     },
   });
 
+
   // Register routes
-  server.route(
-    authRoutes,
-    wasteRoutes,
-    profileRoutes
-  );
+  server.route(authRoutes);
+  server.route(wasteRoutes);
+  server.route(profileRoutes);
 
   await server.start();
   console.log("Server running on %s", server.info.uri);

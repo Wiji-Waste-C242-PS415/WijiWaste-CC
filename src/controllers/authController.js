@@ -5,27 +5,33 @@ const authController = {
   async register(request, h) {
     const { name, email, password } = request.payload;
     try {
-      // Check if the email is already registered
-      const existingUser = await userModel.getUserByEmail(email);
-      if (existingUser) {
-        return h.response({ error: "Email is already registered." }).code(400);
-      }
+        // Periksa apakah email sudah terdaftar
+        const existingUser = await userModel.getUserByEmail(email);
+        if (existingUser) {
+            return h.response({ error: "Email is already registered." }).code(400);
+        }
 
-      const userId = nanoid();
+        const userId = nanoid();
 
-      await userModel.createUser({
-        id: userId,
-        name,
-        email,
-        password,
-      });
+        // Tambahkan field address dan photoUrl dengan nilai default
+        await userModel.createUser({
+            id: userId,
+            name,
+            email,
+            password,
+            address: "", // Default address kosong
+            photoUrl: "", // Default photoUrl kosong
+        });
 
-      return h.response({ message: "User registered successfully!", userId }).code(201);
+        return h.response({
+            message: "User registered successfully!",
+            userId
+        }).code(201);
     } catch (err) {
-      console.error(err);
-      return h.response({ error: "Failed to register user." }).code(500);
+        console.error(err);
+        return h.response({ error: "Failed to register user." }).code(500);
     }
-  },
+},
 
   async login(request, h) {
     const { email, password } = request.payload;
