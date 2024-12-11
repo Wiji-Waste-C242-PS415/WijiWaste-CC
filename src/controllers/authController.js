@@ -69,6 +69,18 @@ const authController = {
       return h.response({ error: "Failed to reset password." }).code(500);
     }
   },
+
+  async logout(request, h) {
+    try {
+      // Menghapus cookie (misalnya untuk sesi login)
+      return h.response({ message: "Logout successful!" })
+        .unstate('session')  // Menghapus cookie 'session'
+        .code(200);
+    } catch (err) {
+      console.error(err);
+      return h.response({ error: "Failed to logout." }).code(500);
+    }
+  },
 };
 
 module.exports = authController;

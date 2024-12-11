@@ -16,6 +16,11 @@ const authRoutes = [
     path: "/reset-password",
     handler: authController.resetPassword,
   },
+  {
+    method: "POST",
+    path: "/logout",
+    handler: authController.logout,
+  },
 ];
 
 module.exports = authRoutes;
