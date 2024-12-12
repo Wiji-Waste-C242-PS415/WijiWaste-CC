@@ -1,12 +1,15 @@
-const db = require("../firestore");
-const usersCollection = db.collection("users");
+const getDb = require("../firestore");
 
 const userModel = {
   async createUser(user) {
+    const db = await getDb();
+    const usersCollection = db.collection("users");
     await usersCollection.doc(user.id).set(user);
   },
 
   async getUserByEmail(email) {
+    const db = await getDb();
+    const usersCollection = db.collection("users");
     const snapshot = await usersCollection.where("email", "==", email).get();
     if (snapshot.empty) {
       return null;
@@ -17,6 +20,8 @@ const userModel = {
   },
 
   async updateUserPassword(email, newPassword) {
+    const db = await getDb();
+    const usersCollection = db.collection("users");
     const snapshot = await usersCollection.where("email", "==", email).get();
     if (snapshot.empty) {
       throw new Error("User not found");

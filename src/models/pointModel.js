@@ -1,7 +1,8 @@
-const db = require("../firestore");
+const getDb = require("../firestore");
 
 const pointModel = {
   async getUserById(userId) {
+    const db = await getDb();
     const userRef = db.collection("users").doc(userId);
     const userDoc = await userRef.get();
     if (!userDoc.exists) return null;
@@ -9,11 +10,13 @@ const pointModel = {
   },
 
   async updateUserPoints(userId, newPoints) {
+    const db = await getDb();
     const userRef = db.collection("users").doc(userId);
     await userRef.update({ points: newPoints });
   },
 
   async addPointExchangeHistory(userId, exchangeData) {
+    const db = await getDb();
     const historyRef = db.collection("users").doc(userId).collection("pointExchangeHistory");
     await historyRef.add({
       ...exchangeData,
@@ -22,6 +25,7 @@ const pointModel = {
   },
 
   async getPointExchangeHistory(userId) {
+    const db = await getDb();
     const historyRef = db.collection("users").doc(userId).collection("pointExchangeHistory");
     const snapshot = await historyRef.orderBy("date", "desc").get();
     if (snapshot.empty) return [];
