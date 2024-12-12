@@ -14,7 +14,7 @@ RUN npm install --production
 COPY . .
 
 # Expose port (ubah sesuai dengan port yang digunakan aplikasi Anda)
-EXPOSE 3000
+EXPOSE 8080
 
 # Perintah untuk menjalankan aplikasi
 CMD ["npm", "start"]
