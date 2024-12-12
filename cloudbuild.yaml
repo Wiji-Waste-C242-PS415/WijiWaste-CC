@@ -19,7 +19,7 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'SERVICE_NAME'
+      - 'wijiwaste-cc'
       - '--image'
       - 'asia-southeast2-docker.pkg.dev/wijiwaste/backend-cc/image-cc:latest'
       - '--region'
