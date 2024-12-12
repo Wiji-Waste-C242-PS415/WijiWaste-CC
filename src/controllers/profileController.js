@@ -5,23 +5,25 @@ const path = require("path");
 const profileController = {
   // Mengambil profil pengguna berdasarkan userId
   async getProfile(request, h) {
-    const userId = request.query.userId; // Mendapatkan userId dari query parameter
+    const userId = request.params.userId; // Mendapatkan userId dari parameter URL
     try {
       const user = await profileModel.getUserById(userId);
       if (!user) {
         return h.response({ error: "User not found." }).code(404);
       }
 
-      return h.response({
-        message: "Profile retrieved successfully.",
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          address: user.address || "",
-          photoUrl: user.photoUrl || "",
-        },
-      }).code(200);
+      return h
+        .response({
+          message: "Profile retrieved successfully.",
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            address: user.address || "",
+            photoUrl: user.photoUrl || "",
+          },
+        })
+        .code(200);
     } catch (err) {
       console.error(err);
       return h.response({ error: "Failed to retrieve profile." }).code(500);

@@ -3,7 +3,7 @@ const profileController = require("../controllers/profileController");
 const profileRoutes = [
   {
     method: "GET",
-    path: "/profile",
+    path: "/profile/{userId}",
     handler: profileController.getProfile,
   },
   {
