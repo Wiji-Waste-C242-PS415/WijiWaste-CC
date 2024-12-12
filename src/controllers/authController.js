@@ -12,7 +12,6 @@ const authController = {
         }
 
         const userId = nanoid();
-
         // Tambahkan field address dan photoUrl dengan nilai default
         await userModel.createUser({
             id: userId,
@@ -20,7 +19,8 @@ const authController = {
             email,
             password,
             address: "", // Default address kosong
-            photoUrl: "", // Default photoUrl kosong
+            photoUrl: "",
+            points: 0,
         });
 
         return h.response({
